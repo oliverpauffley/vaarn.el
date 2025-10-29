@@ -1,4 +1,4 @@
-;;; cube.el --- cube coordinates for hexagonal grids -*- lexical-binding: t; -*-
+;;; cube.el --- Cube coordinates for hexagonal grids -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2025 Oliver Pauffley
 ;;
@@ -30,13 +30,49 @@ see https://www.redblobgames.com/grids/hexagons/#coordinates-cube ."
   (r 0 :type int)
   (s 0 :type int))
 
-(defun cube-coord-move-up (c)
-  "Move north/up."
-  (cl-decf (cube-coord-r c))
-  (cl-incf (cube-coord-s c))
-  c)
+(defun cube-co (q r s)
+  "Shorthand constructor for `cube-coord'."
+  (make-cube-coord :q q :r r :s s))
 
-(message "%s" (cube-coord-move-up (make-cube-coord :q 1 :r 1 :s 1)))
+(defun cube-coord-move-n (c)
+  "Move coord C north/up."
+  (cube-coord-add c (make-cube-coord :q 0 :r -1 :s 1)))
+
+(defun cube-coord-move-s (c)
+  "Move coord C south/down."
+  (cube-coord-add c (make-cube-coord :q 0 :r 1 :s -1)))
+
+(defun cube-coord-move-ne (c)
+  "Move coord C north east."
+  (cube-coord-add c (make-cube-coord :q -1 :r 0 :s 1)))
+
+(defun cube-coord-move-sw (c)
+  "Move coord C south west."
+  (cube-coord-add c (make-cube-coord :q 1 :r 0 :s -1)))
+
+(defun cube-coord-move-nw (c)
+  "Move coord C north west."
+  (cube-coord-add c (make-cube-coord :q 1 :r -1 :s 0)))
+
+(defun cube-coord-move-se (c)
+  "Move coord C north east."
+  (cube-coord-add c (make-cube-coord :q -1 :r 1 :s 0)))
+
+(defun cube-coord-add (a b)
+  "Add A and B cube coords."
+  (make-cube-coord
+   :q (+ (cube-coord-q a) (cube-coord-q b))
+   :r (+ (cube-coord-r a) (cube-coord-r b))
+   :s (+ (cube-coord-s a) (cube-coord-s b))))
+
+(defun cube-eq (a b)
+  "Return true if A and B are equal."
+  (if (and
+       (eq (cube-coord-q a) (cube-coord-q b))
+       (eq (cube-coord-r a) (cube-coord-r b))
+       (eq (cube-coord-s a) (cube-coord-s b)))
+      t
+    nil))
 
 (provide 'cube)
 ;;; cube.el ends here
