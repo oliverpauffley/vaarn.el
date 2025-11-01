@@ -1,7 +1,5 @@
 ;;; cube.el --- Cube coordinates for hexagonal grids -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2025 Oliver Pauffley
-;;
 ;; Author: Oliver Pauffley <mrpauffley@gmail.com>
 ;; Maintainer: Oliver Pauffley <mrpauffley@gmail.com>
 ;; Created: October 28, 2025
