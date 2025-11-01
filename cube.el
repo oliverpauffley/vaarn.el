@@ -25,7 +25,7 @@
 Q is zero from top to bottom, or q is the horizonal axis
 R is zero from top left to bottom right
 S is zero from bottom left to top right.
-see https://www.redblobgames.com/grids/hexagons/#coordinates-cube ."
+see https://www.redblobgames.com/grids/hexagons/#coordinates-cube."
   (q 0 :type int)
   (r 0 :type int)
   (s 0 :type int))
@@ -66,13 +66,29 @@ see https://www.redblobgames.com/grids/hexagons/#coordinates-cube ."
    :s (+ (cube-coord-s a) (cube-coord-s b))))
 
 (defun cube-eq (a b)
-  "Return true if A and B are equal."
-  (if (and
-       (eq (cube-coord-q a) (cube-coord-q b))
-       (eq (cube-coord-r a) (cube-coord-r b))
-       (eq (cube-coord-s a) (cube-coord-s b)))
-      t
-    nil))
+  "Return non nil if A and B are equal."
+  (and
+   (= (cube-coord-q a) (cube-coord-q b))
+   (= (cube-coord-r a) (cube-coord-r b))
+   (= (cube-coord-s a) (cube-coord-s b))))
+
+(defun cube-coord-flip-not-q (c)
+  "For the coord C keep the q value the same but switch the r and s."
+  (make-cube-coord :q (cube-coord-q c)
+                   :r (cube-coord-s c)
+                   :s (cube-coord-r c)))
+
+(defun cube-coord-flip-not-s (c)
+  "For the coord C keep the s value the same but switch the q and r."
+  (make-cube-coord :q (cube-coord-r c)
+                   :r (cube-coord-q c)
+                   :s (cube-coord-s c)))
+
+(defun cube-coord-flip-not-r (c)
+  "For the coord C keep the r value the same but switch the q and s."
+  (make-cube-coord :q (cube-coord-s c)
+                   :r (cube-coord-r c)
+                   :s (cube-coord-q c)))
 
 (provide 'cube)
 ;;; cube.el ends here

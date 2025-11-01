@@ -1,7 +1,5 @@
 ;;; vaarn.el --- Game master tools for vaults of vaarn -*- lexical-binding: t; -*-
 ;;;
-;; Copyright (C) 2025 Oliver Pauffley
-;;
 ;; Author: Oliver Pauffley <mrpauffley@gmail.com>
 ;; Maintainer: Oliver Pauffley <mrpauffley@gmail.com>
 ;; Created: October 28, 2025
@@ -26,14 +24,14 @@
   :group 'tools
   :prefix "vaarn-")
 
-(defvar vaarn--buffer-name "*vaarn-weather*"
+(defconst vaarn--buffer-name "*vaarn-weather*"
   "Buffer name for drawing the weather map to.")
 
 (defcustom vaarn-weather-symbols
   '((still . "s") (dust-storm . "d") (sand-storm . "t") (prismatic-tempest . "P")
     (worm-pollen . "w") (heatwave . "h") (hazy . "a") (rain . "r"))
   "A assoc list of weather and the symbol to be displayed for that weather."
-  :type '(alist :key-type string :value-type string)
+  :type '(alist :key-type symbol :value-type string)
   :group 'vaarn)
 
 (defvar vaarn--weather-descriptions
@@ -44,7 +42,7 @@
     (heatwave . "Heatwave:\nUrth’s dying sun musters all the warmth it can. PCs must consume twice their normal ration of water per day if they wish to travel during a heatwave.")
     (worm-pollen . "Worm Pollen:\nThe sandworms of the Interior reproduce through a baroque, decade-long process of parthenogenesis, culminating in the explosive release of thousands of melon-sized spores into the atmosphere. This worm-pollen drifts back to Urth in ponderous sticky deluges that can last for weeks. Progress through shifting mounds of the stuff is slowed to half normal speed; the upside is that worm-pollen is edible, and many a starving man has been saved by the timely arrival of spores from the heavens. Treat worm-pollen days as providing d4 rations per player.")
     (rain . "Rain:\nA rare bounty. The parched blue earth is blessed with water. The party may collect 2d6 days of rations per member. In the aftermath of a rainshower, the desert is conquered by a short-lived imperium of majestic flora.")
-    (prismatic-tempest ."Prismatic Tempest:\nThe sky bruises with clouds of midnight blue. Howling winds carry scouring sheets of sand across the landscape. Thunder rends the air and polychromatic lightning caresses the desert like the tendrils of a jellyfish deity. No travel of any kind is possible, and the PCs will take 3d6 electrical damage every hour they spend above-ground."))
+    (prismatic-tempest . "Prismatic Tempest:\nThe sky bruises with clouds of midnight blue. Howling winds carry scouring sheets of sand across the landscape. Thunder rends the air and polychromatic lightning caresses the desert like the tendrils of a jellyfish deity. No travel of any kind is possible, and the PCs will take 3d6 electrical damage every hour they spend above-ground."))
   "An assoc list of weather and the full description.")
 
 (defcustom vaarn-weather-locations
@@ -64,16 +62,16 @@
     (,(cube-co -3 1 2) . worm-pollen)
     (,(cube-co -1 0 1) . worm-pollen)
     (,(cube-co 1 -1 0) . still)
-    (,(cube-co 3 -2 1) . heatwave)
+    (,(cube-co 3 -2 -1) . heatwave)
     (,(cube-co -2 1 1) . still)
     (,(cube-co 0 0 0) . still)
     (,(cube-co 2 -1 -1) . sand-storm)
     (,(cube-co -3 2 1) . still)
     (,(cube-co -1 1 0) . dust-storm)
     (,(cube-co 1 0 -1) . hazy)
-    (,(cube-co 3 -1 2) . heatwave)
+    (,(cube-co 3 -1 -2) . heatwave)
     (,(cube-co -2 2 0) . dust-storm)
-    (,(cube-co 0 1 -2) . still)
+    (,(cube-co 0 1 -1) . still)
     (,(cube-co 2 0 -2) . hazy)
     (,(cube-co -3 3 0) . still)
     (,(cube-co -1 2 -1) . still)
@@ -101,6 +99,14 @@ Starting with the top center then working down row by row."
                                        :s 0)
   "The start space on the weather grid (the centre).")
 
+(defvar-local vaarn--current-weather-coord nil
+  "The current space on the weather grid.")
+
+(defun vaarn-reset-weather ()
+  "Reset the weather to the centre."
+  (interactive)
+  (setq vaarn--current-weather-coord vaarn--starting-weather-coord)
+  (vaarn-weather-hex))
 
 (defvar vaarn--weather-hex-map
   "
@@ -147,20 +153,21 @@ Starting with the top center then working down row by row."
 With format strings to fill in for the weather in each position.")
 
 ;; TODO mouse over the hexes for their weather?
-(defun vaarn-weather-hex ()
-  "Draws a weather hex map in it's own buffer."
-  (interactive)
+;; TODO load postion from file?
+(defun vaarn--draw-weather-hex (location)
+  "Draws a weather hex map in it's own buffer, with LOCATION marked."
   (let* ((buf (get-buffer-create vaarn--buffer-name))
-         (current-location vaarn--starting-weather-coord)
-         (symbols (vaarn--prepare-display-locations vaarn-weather-locations current-location vaarn-weather-symbols))
-         (weather-description (alist-get (alist-get current-location vaarn-weather-locations nil nil #'cube-eq) vaarn--weather-descriptions)))
+         (symbols (vaarn--prepare-display-locations vaarn-weather-locations location vaarn-weather-symbols))
+         (weather-description (alist-get (alist-get location vaarn-weather-locations nil nil #'cube-eq) vaarn--weather-descriptions)))
     (with-current-buffer buf
       (erase-buffer)
+      (vaarn-weather-mode 1)
       (goto-char 0)
       (display-buffer buf)
       (insert (apply 'format vaarn--weather-hex-map symbols))
-      (newline)
-      (insert (propertize weather-description 'face 'vaarn--active-location)))))
+      (insert (propertize weather-description 'face 'vaarn--active-location))
+      (message "%s" vaarn-weather-mode-map)
+      (goto-char 0))))
 
 (defun vaarn--prepare-display-locations (locations current-location symbol-mapping)
   "Convert location weather values LOCATIONS into symbols using SYMBOL-MAPPING.
@@ -170,17 +177,13 @@ If the location is the CURRENT-LOCATION then format with a different face."
                    (pos (car s))
                    (symbol (alist-get sym symbol-mapping)))
               (if (cube-eq pos current-location)
-                  (progn
-                    (message "%s" (car s))
-                    (propertize symbol 'face 'vaarn--active-location))
+                  (propertize symbol 'face 'vaarn--active-location)
                 symbol)))
           locations))
 
 
-
-
-(defun vaarn-move-weather-hex (current-coord)
-  "Move the from the CURRENT-COORD to a new one.
+(defun vaarn-move-weather-hex ()
+  "Move the from the current coord to a new one.
 This means rolling a dice and moving to the corresponding hex.
 At edges we carry around the map and back on.
 Except at edges marked with `X' where we stay put.
@@ -190,30 +193,92 @@ Directions
   /   \
 6 \___/ 4
     5"
-  (let* ((next-coord (vaarn--next-coord current-coord)))
-    ;; do a bounds check on the next-coord
-    ))
+  (interactive)
+  (let* ((current-coord (or vaarn--current-weather-coord vaarn--starting-weather-coord))
+         (next-coord (vaarn--next-coord current-coord)))
+    (setq vaarn--current-weather-coord next-coord)
+    (vaarn--draw-weather-hex next-coord)))
+
+(defun vaarn-weather-hex ()
+  "Draws a weather hex map in it's own buffer.
+Either loads the location or sets to a default value."
+  (interactive)
+  (let ((coord (if (cube-coord-p vaarn--current-weather-coord)
+                   vaarn--current-weather-coord
+                 vaarn--starting-weather-coord)))
+    (vaarn--draw-weather-hex coord)))
+
 
 (defun vaarn--next-coord (c)
   "Calculate a possible next coord from coord C.
-This doesn't do any bounds checking it just calculates
-the next coord."
-  (let ((roll (vaarn--d6)))
-    (cond ((= roll 1) (cube-coord-move-nw c))
-          ((= roll 2) (cube-coord-move-n))
-          ((= roll 3)  (cube-coord-move-ne c))
-          ((= roll 4)  (cube-coord-move-se c))
-          ((= roll 5)  (cube-coord-move-s c))
-          (t  (cube-coord-move-sw c)))
-    c))
+If the new coord is out of bounds this might wrap or return the same coord as C."
+  (let* ((roll (vaarn--d6))
+         (maybe-new-coord (cond ((= roll 1) (cube-coord-move-nw c))
+                                ((= roll 2) (cube-coord-move-n c))
+                                ((= roll 3)  (cube-coord-move-ne c))
+                                ((= roll 4)  (cube-coord-move-se c))
+                                ((= roll 5)  (cube-coord-move-s c))
+                                ((= roll 6)  (cube-coord-move-sw c))))
 
-(defun vaarn--d6 (cube-co )
+         (new-coord (cond
+                     ;; if we are still in the grid then we can just return this value
+                     ((not (vaarn--weather-out-of-bounds-p maybe-new-coord)) maybe-new-coord)
+                     ;; if the next coord is one of the `X's then stay put
+                     ((vaarn--weather-in-x-coord-p maybe-new-coord) c)
+                     ;; we must be off grid but not in x so loop around
+                     (t (vaarn--weather-loop-coord roll c)))))
+    new-coord))
+
+(defun vaarn--weather-out-of-bounds-p (c)
+  "Return non nil if the coordinates C is off the map."
+  (or (> (abs (cube-coord-q c)) 3)
+      (> (abs (cube-coord-r c)) 3)
+      (> (abs (cube-coord-s c)) 3)))
+
+(defvar vaarn--x-coords
+  `(,(cube-co 0 -4 4)
+    ,(cube-co -1 -3 4)
+    ,(cube-co 1 -4 3)
+    ,(cube-co -3 -1 4)
+    ,(cube-co 3 -4 1)
+    ,(cube-co 0 4 -4)
+    ,(cube-co -1 4 -3)
+    ,(cube-co 1 4 -3)
+    ,(cube-co -3 4 -1)
+    ,(cube-co 3 1 -4)))
+
+(defun vaarn--weather-in-x-coord-p (c)
+  "Return non nil if the coordinate C is in one of the `X's."
+  (seq-find (lambda (val) (cube-eq c val)) vaarn--x-coords))
+
+(defun vaarn--weather-loop-coord (roll c)
+  "Gived a ROLL and C coordinate, loop it around the grid round to the otherside.
+This is actually just swapping the two coordinates in the direction we stepped in."
+  (cond ((or (= roll 2)(= roll 5)) (cube-coord-flip-not-q c))
+        ((or (= roll 3)(= roll 6)) (cube-coord-flip-not-s c))
+        ((or (= roll 4)(= roll 1))  (cube-coord-flip-not-r c))))
+
+(defun vaarn--d6 ()
   "Roll a 6 sided dice."
   (vaarn--roll-dice 6))
 
 (defun vaarn--roll-dice (size)
   "Roll a SIZE sided dice."
   (+ (random size) 1))
+
+;;;###autoload
+(define-minor-mode vaarn-weather-mode
+  "Move around the vaarn weather hex map to generate weather.
+\\<vaarn-weather-mode-map>
+Use \\[vaarn-weather-hex] to start a new map.
+Then use \\[vaarn-move-weather-hex] to move around the map.
+
+\\{vaarn-weater-mode-map}"
+  :lighter " Vaarn Weather"
+  :keymap `((, (kbd "r") . vaarn-move-weather-hex)
+            (, (kbd "e") . vaarn-reset-weather))
+  :interactive nil)
+
 
 (provide 'vaarn)
 ;;; vaarn.el ends here
