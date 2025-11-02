@@ -12,7 +12,7 @@
 ;;
 ;;; Commentary:
 ;; Cube based coordinate system for hexagonal grids
-;; more information here:
+;; more information here: https://www.redblobgames.com/grids/hexagons/#coordinates-cube."
 ;;
 ;;; Code:
 
@@ -23,13 +23,16 @@
 Q is zero from top to bottom, or q is the horizonal axis
 R is zero from top left to bottom right
 S is zero from bottom left to top right.
-see https://www.redblobgames.com/grids/hexagons/#coordinates-cube."
+see https://www.redblobgames.com/grids/hexagons/#coordinates-cube.
+Each set of coordinates should always sum to zero."
+
   (q 0 :type int)
   (r 0 :type int)
   (s 0 :type int))
 
 (defun cube-co (q r s)
   "Shorthand constructor for `cube-coord'."
+  (cl-assert (= 0 (+ q r s)))
   (make-cube-coord :q q :r r :s s))
 
 (defun cube-coord-move-n (c)
@@ -62,6 +65,12 @@ see https://www.redblobgames.com/grids/hexagons/#coordinates-cube."
    :q (+ (cube-coord-q a) (cube-coord-q b))
    :r (+ (cube-coord-r a) (cube-coord-r b))
    :s (+ (cube-coord-s a) (cube-coord-s b))))
+
+(ert-deftest cube-coord-add ()
+  "Tests adding cube coordinates together."
+  (should (cube-eq (cube-coord-add (cube-co 0 0 0) (cube-co 0 0 0)) (cube-co 0 0 0)))
+  (should (cube-eq (cube-coord-add (cube-co 0 0 0) (cube-co 1 -1 0)) (cube-co 1 -1 0)))
+  )
 
 (defun cube-eq (a b)
   "Return non nil if A and B are equal."

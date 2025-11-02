@@ -243,7 +243,7 @@ If the new coord is out of bounds this might wrap or return the same coord as C.
     ,(cube-co 3 -4 1)
     ,(cube-co 0 4 -4)
     ,(cube-co -1 4 -3)
-    ,(cube-co 1 4 -3)
+    ,(cube-co 1 3 -4)
     ,(cube-co -3 4 -1)
     ,(cube-co 3 1 -4)))
 
