@@ -79,8 +79,8 @@ Each set of coordinates should always sum to zero."
    (= (cube-coord-r a) (cube-coord-r b))
    (= (cube-coord-s a) (cube-coord-s b))))
 
-(ert-deftest cube-co
-    "Confirm equality."
+(ert-deftest cube-co ()
+  "Confirm equality."
   (should (cube-eq (cube-co -1 -3 4) (cube-co -1 -3 4)))
   (should (cube-eq (cube-co 1 -1 0) (cube-co 1 -1 0)))
   (should (cube-eq (cube-co -9 6 3) (cube-co -9 6 3))))
