@@ -25,7 +25,6 @@ R is zero from top left to bottom right
 S is zero from bottom left to top right.
 see https://www.redblobgames.com/grids/hexagons/#coordinates-cube.
 Each set of coordinates should always sum to zero."
-
   (q 0 :type int)
   (r 0 :type int)
   (s 0 :type int))
@@ -70,7 +69,8 @@ Each set of coordinates should always sum to zero."
   "Tests adding cube coordinates together."
   (should (cube-eq (cube-coord-add (cube-co 0 0 0) (cube-co 0 0 0)) (cube-co 0 0 0)))
   (should (cube-eq (cube-coord-add (cube-co 0 0 0) (cube-co 1 -1 0)) (cube-co 1 -1 0)))
-  )
+  (should (cube-eq (cube-coord-add (cube-co -3 1 2) (cube-co 3 -1 -2)) (cube-co 0 0 0)))
+  (should (cube-eq (cube-coord-add (cube-co 4 -2 -2) (cube-co 4 0 -4)) (cube-co 8 -2 -6))))
 
 (defun cube-eq (a b)
   "Return non nil if A and B are equal."
@@ -78,6 +78,12 @@ Each set of coordinates should always sum to zero."
    (= (cube-coord-q a) (cube-coord-q b))
    (= (cube-coord-r a) (cube-coord-r b))
    (= (cube-coord-s a) (cube-coord-s b))))
+
+(ert-deftest cube-co
+    "Confirm equality."
+  (should (cube-eq (cube-co -1 -3 4) (cube-co -1 -3 4)))
+  (should (cube-eq (cube-co 1 -1 0) (cube-co 1 -1 0)))
+  (should (cube-eq (cube-co -9 6 3) (cube-co -9 6 3))))
 
 (defun cube-coord-flip-not-q (c)
   "For the coord C keep the q value the same but switch the r and s."
