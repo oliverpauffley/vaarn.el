@@ -99,13 +99,15 @@ Starting with the top center then working down row by row."
                                        :s 0)
   "The start space on the weather grid (the centre).")
 
-(defvar-local vaarn--current-weather-coord nil
-  "The current space on the weather grid.")
+(defvar vaarn-current-weather-coord nil
+  "The current space on the weather grid.
+This is exported so that it can be set in another file
+to have some `memory' of the weather.")
 
 (defun vaarn-reset-weather ()
   "Reset the weather to the centre."
   (interactive)
-  (setq vaarn--current-weather-coord vaarn--starting-weather-coord)
+  (setq vaarn-current-weather-coord vaarn--starting-weather-coord)
   (vaarn-weather-hex))
 
 (defvar vaarn--weather-hex-map
@@ -152,12 +154,11 @@ Starting with the top center then working down row by row."
   "A blank weather hex flower.
 With format strings to fill in for the weather in each position.")
 
-;; TODO mouse over the hexes for their weather?
 ;; TODO load postion from file?
 (defun vaarn--draw-weather-hex (location)
   "Draws a weather hex map in it's own buffer, with LOCATION marked."
   (let* ((buf (get-buffer-create vaarn--buffer-name))
-         (symbols (vaarn--prepare-display-locations vaarn-weather-locations location vaarn-weather-symbols))
+         (symbols (vaarn--prepare-display-locations vaarn-weather-locations location vaarn-weather-symbols vaarn--weather-descriptions))
          (weather-description (alist-get (alist-get location vaarn-weather-locations nil nil #'equal) vaarn--weather-descriptions)))
     (with-current-buffer buf
       (setq buffer-read-only nil)
@@ -170,16 +171,18 @@ With format strings to fill in for the weather in each position.")
       (goto-char 0)
       (setq buffer-read-only t))))
 
-(defun vaarn--prepare-display-locations (locations current-location symbol-mapping)
+(defun vaarn--prepare-display-locations (locations current-location symbol-mapping weather-descriptions)
   "Convert location weather values LOCATIONS into symbols using SYMBOL-MAPPING.
-If the location is the CURRENT-LOCATION then format with a different face."
+If the location is the CURRENT-LOCATION then format with a different face.
+Also adds the weather descriptions as a mouse hover tooltip"
   (mapcar (lambda (s)
             (let* ((sym (cdr s))
                    (pos (car s))
-                   (symbol (alist-get sym symbol-mapping)))
+                   (symbol (alist-get sym symbol-mapping))
+                   (hover-symbol (propertize symbol 'help-echo (symbol-name sym))))
               (if (equal pos current-location)
-                  (propertize symbol 'face 'vaarn--active-location)
-                symbol)))
+                  (propertize hover-symbol 'face 'vaarn--active-location)
+                hover-symbol)))
           locations))
 
 
@@ -195,17 +198,17 @@ Directions
 6 \___/ 4
     5"
   (interactive)
-  (let* ((current-coord (or vaarn--current-weather-coord vaarn--starting-weather-coord))
+  (let* ((current-coord (or vaarn-current-weather-coord vaarn--starting-weather-coord))
          (next-coord (vaarn--next-coord current-coord)))
-    (setq vaarn--current-weather-coord next-coord)
+    (setq vaarn-current-weather-coord next-coord)
     (vaarn--draw-weather-hex next-coord)))
 
 (defun vaarn-weather-hex ()
   "Draws a weather hex map in it's own buffer.
 Either loads the location or sets to a default value."
   (interactive)
-  (let ((coord (if (cube-coord-p vaarn--current-weather-coord)
-                   vaarn--current-weather-coord
+  (let ((coord (if (cube-coord-p vaarn-current-weather-coord)
+                   vaarn-current-weather-coord
                  vaarn--starting-weather-coord)))
     (vaarn--draw-weather-hex coord)))
 
