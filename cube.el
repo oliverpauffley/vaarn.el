@@ -91,17 +91,32 @@ Each set of coordinates should always sum to zero."
                    :r (cube-coord-s c)
                    :s (cube-coord-r c)))
 
-(defun cube-coord-flip-not-s (c)
-  "For the coord C keep the s value the same but switch the q and r."
-  (make-cube-coord :q (cube-coord-r c)
-                   :r (cube-coord-q c)
-                   :s (cube-coord-s c)))
+(ert-deftest cube-coord-flip-not-q ()
+  "Should keep the q coordinate the same whilst swapping the other two."
+  (should (cube-eq (cube-coord-flip-not-q (cube-co -1 -3 4)) (cube-co -1 4 -3)))
+  (should (cube-eq (cube-coord-flip-not-q (cube-co 0 1 -1)) (cube-co 0 -1 1))))
 
 (defun cube-coord-flip-not-r (c)
   "For the coord C keep the r value the same but switch the q and s."
   (make-cube-coord :q (cube-coord-s c)
                    :r (cube-coord-r c)
                    :s (cube-coord-q c)))
+
+(ert-deftest cube-coord-flip-not-r ()
+  "Should keep the r coordinate the same whilst swapping the other two."
+  (should (cube-eq (cube-coord-flip-not-r (cube-co -1 -3 4)) (cube-co 4 -3 -1)))
+  (should (cube-eq (cube-coord-flip-not-r (cube-co 0 1 -1)) (cube-co -1 1 0))))
+
+(defun cube-coord-flip-not-s (c)
+  "For the coord C keep the s value the same but switch the q and r."
+  (make-cube-coord :q (cube-coord-r c)
+                   :r (cube-coord-q c)
+                   :s (cube-coord-s c)))
+
+(ert-deftest cube-coord-flip-not-s ()
+  "Should keep the s coordinate the same whilst swapping the other two."
+  (should (cube-eq (cube-coord-flip-not-s (cube-co -1 -3 4)) (cube-co -3 -1 4)))
+  (should (cube-eq (cube-coord-flip-not-s (cube-co 0 1 -1)) (cube-co 1 0 -1))))
 
 (provide 'cube)
 ;;; cube.el ends here
