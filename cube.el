@@ -17,6 +17,8 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'ert)
+
 
 (cl-defstruct cube-coord
   "Using a cube coordinate system.
@@ -58,6 +60,75 @@ Each set of coordinates should always sum to zero."
   "Move coord C north east."
   (cube-coord-add c (make-cube-coord :q -1 :r 1 :s 0)))
 
+
+(defconst cube--test-origin (make-cube-coord :q 0 :r 0 :s 0))
+
+(ert-deftest cube-coord-move-n-test ()
+  "Test moving north decreases r by 1 and increases s by 1."
+  (let ((result (cube-coord-move-n cube--test-origin)))
+    (should (equal result (make-cube-coord :q 0 :r -1 :s 1)))))
+
+(ert-deftest cube-coord-move-s-test ()
+  "Test moving south increases r by 1 and decreases s by 1."
+  (let ((result (cube-coord-move-s cube--test-origin)))
+    (should (equal result (make-cube-coord :q 0 :r 1 :s -1)))))
+
+(ert-deftest cube-coord-move-ne-test ()
+  "Test moving north-east decreases q by 1 and increases s by 1."
+  (let ((result (cube-coord-move-ne cube--test-origin)))
+    (should (equal result (make-cube-coord :q -1 :r 0 :s 1)))))
+
+(ert-deftest cube-coord-move-sw-test ()
+  "Test moving south-west increases q by 1 and decreases s by 1."
+  (let ((result (cube-coord-move-sw cube--test-origin)))
+    (should (equal result (make-cube-coord :q 1 :r 0 :s -1)))))
+
+(ert-deftest cube-coord-move-nw-test ()
+  "Test moving north-west increases q by 1 and decreases r by 1."
+  (let ((result (cube-coord-move-nw cube--test-origin)))
+    (should (equal result (make-cube-coord :q 1 :r -1 :s 0)))))
+
+(ert-deftest cube-coord-move-se-test ()
+  "Test moving south-east decreases q by 1 and increases r by 1."
+  (let ((result (cube-coord-move-se cube--test-origin)))
+    (should (equal result (make-cube-coord :q -1 :r 1 :s 0)))))
+
+(ert-deftest cube-coord-move-n-s-composition-test ()
+  "Moving north then south returns to origin."
+  (let* ((north (cube-coord-move-n cube--test-origin))
+         (back (cube-coord-move-s north)))
+    (should (equal back cube--test-origin))))
+
+(ert-deftest cube-coord-move-s-n-composition-test ()
+  "Moving south then north returns to origin."
+  (let* ((south (cube-coord-move-s cube--test-origin))
+         (back (cube-coord-move-n south)))
+    (should (equal back cube--test-origin))))
+
+(ert-deftest cube-coord-move-ne-sw-composition-test ()
+  "Moving north-east then south-west returns to origin."
+  (let* ((ne (cube-coord-move-ne cube--test-origin))
+         (back (cube-coord-move-sw ne)))
+    (should (equal back cube--test-origin))))
+
+(ert-deftest cube-coord-move-sw-ne-composition-test ()
+  "Moving south-west then north-east returns to origin."
+  (let* ((sw (cube-coord-move-sw cube--test-origin))
+         (back (cube-coord-move-ne sw)))
+    (should (equal back cube--test-origin))))
+
+(ert-deftest cube-coord-move-nw-se-composition-test ()
+  "Moving north-west then south-east returns to origin."
+  (let* ((nw (cube-coord-move-nw cube--test-origin))
+         (back (cube-coord-move-se nw)))
+    (should (equal back cube--test-origin))))
+
+(ert-deftest cube-coord-move-se-nw-composition-test ()
+  "Moving south-east then north-west returns to origin."
+  (let* ((se (cube-coord-move-se cube--test-origin))
+         (back (cube-coord-move-nw se)))
+    (should (equal back cube--test-origin))))
+
 (defun cube-coord-add (a b)
   "Add A and B cube coords."
   (make-cube-coord
@@ -67,23 +138,11 @@ Each set of coordinates should always sum to zero."
 
 (ert-deftest cube-coord-add ()
   "Tests adding cube coordinates together."
-  (should (cube-eq (cube-coord-add (cube-co 0 0 0) (cube-co 0 0 0)) (cube-co 0 0 0)))
-  (should (cube-eq (cube-coord-add (cube-co 0 0 0) (cube-co 1 -1 0)) (cube-co 1 -1 0)))
-  (should (cube-eq (cube-coord-add (cube-co -3 1 2) (cube-co 3 -1 -2)) (cube-co 0 0 0)))
-  (should (cube-eq (cube-coord-add (cube-co 4 -2 -2) (cube-co 4 0 -4)) (cube-co 8 -2 -6))))
+  (should (equal (cube-coord-add (cube-co 0 0 0) (cube-co 0 0 0)) (cube-co 0 0 0)))
+  (should (equal (cube-coord-add (cube-co 0 0 0) (cube-co 1 -1 0)) (cube-co 1 -1 0)))
+  (should (equal (cube-coord-add (cube-co -3 1 2) (cube-co 3 -1 -2)) (cube-co 0 0 0)))
+  (should (equal (cube-coord-add (cube-co 4 -2 -2) (cube-co 4 0 -4)) (cube-co 8 -2 -6))))
 
-(defun cube-eq (a b)
-  "Return non nil if A and B are equal."
-  (and
-   (= (cube-coord-q a) (cube-coord-q b))
-   (= (cube-coord-r a) (cube-coord-r b))
-   (= (cube-coord-s a) (cube-coord-s b))))
-
-(ert-deftest cube-co ()
-  "Confirm equality."
-  (should (cube-eq (cube-co -1 -3 4) (cube-co -1 -3 4)))
-  (should (cube-eq (cube-co 1 -1 0) (cube-co 1 -1 0)))
-  (should (cube-eq (cube-co -9 6 3) (cube-co -9 6 3))))
 
 (defun cube-coord-flip-not-q (c)
   "For the coord C keep the q value the same but switch the r and s."
@@ -93,8 +152,8 @@ Each set of coordinates should always sum to zero."
 
 (ert-deftest cube-coord-flip-not-q ()
   "Should keep the q coordinate the same whilst swapping the other two."
-  (should (cube-eq (cube-coord-flip-not-q (cube-co -1 -3 4)) (cube-co -1 4 -3)))
-  (should (cube-eq (cube-coord-flip-not-q (cube-co 0 1 -1)) (cube-co 0 -1 1))))
+  (should (equal (cube-coord-flip-not-q (cube-co -1 -3 4)) (cube-co -1 4 -3)))
+  (should (equal (cube-coord-flip-not-q (cube-co 0 1 -1)) (cube-co 0 -1 1))))
 
 (defun cube-coord-flip-not-r (c)
   "For the coord C keep the r value the same but switch the q and s."
@@ -104,8 +163,8 @@ Each set of coordinates should always sum to zero."
 
 (ert-deftest cube-coord-flip-not-r ()
   "Should keep the r coordinate the same whilst swapping the other two."
-  (should (cube-eq (cube-coord-flip-not-r (cube-co -1 -3 4)) (cube-co 4 -3 -1)))
-  (should (cube-eq (cube-coord-flip-not-r (cube-co 0 1 -1)) (cube-co -1 1 0))))
+  (should (equal (cube-coord-flip-not-r (cube-co -1 -3 4)) (cube-co 4 -3 -1)))
+  (should (equal (cube-coord-flip-not-r (cube-co 0 1 -1)) (cube-co -1 1 0))))
 
 (defun cube-coord-flip-not-s (c)
   "For the coord C keep the s value the same but switch the q and r."
@@ -115,8 +174,8 @@ Each set of coordinates should always sum to zero."
 
 (ert-deftest cube-coord-flip-not-s ()
   "Should keep the s coordinate the same whilst swapping the other two."
-  (should (cube-eq (cube-coord-flip-not-s (cube-co -1 -3 4)) (cube-co -3 -1 4)))
-  (should (cube-eq (cube-coord-flip-not-s (cube-co 0 1 -1)) (cube-co 1 0 -1))))
+  (should (equal (cube-coord-flip-not-s (cube-co -1 -3 4)) (cube-co -3 -1 4)))
+  (should (equal (cube-coord-flip-not-s (cube-co 0 1 -1)) (cube-co 1 0 -1))))
 
 (provide 'cube)
 ;;; cube.el ends here

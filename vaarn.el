@@ -158,7 +158,7 @@ With format strings to fill in for the weather in each position.")
   "Draws a weather hex map in it's own buffer, with LOCATION marked."
   (let* ((buf (get-buffer-create vaarn--buffer-name))
          (symbols (vaarn--prepare-display-locations vaarn-weather-locations location vaarn-weather-symbols))
-         (weather-description (alist-get (alist-get location vaarn-weather-locations nil nil #'cube-eq) vaarn--weather-descriptions)))
+         (weather-description (alist-get (alist-get location vaarn-weather-locations nil nil #'equal) vaarn--weather-descriptions)))
     (with-current-buffer buf
       (setq buffer-read-only nil)
       (erase-buffer)
@@ -177,7 +177,7 @@ If the location is the CURRENT-LOCATION then format with a different face."
             (let* ((sym (cdr s))
                    (pos (car s))
                    (symbol (alist-get sym symbol-mapping)))
-              (if (cube-eq pos current-location)
+              (if (equal pos current-location)
                   (propertize symbol 'face 'vaarn--active-location)
                 symbol)))
           locations))
@@ -250,7 +250,7 @@ If the new coord is out of bounds this might wrap or return the same coord as C.
 
 (defun vaarn--weather-in-x-coord-p (c)
   "Return non nil if the coordinate C is in one of the `X's."
-  (seq-find (lambda (val) (cube-eq c val)) vaarn--x-coords))
+  (seq-find (lambda (val) (equal c val)) vaarn--x-coords))
 
 (defun vaarn--weather-loop-coord (roll c)
   "Gived a ROLL and C coordinate, loop it around the grid round to the otherside.
