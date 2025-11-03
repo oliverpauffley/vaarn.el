@@ -1,48 +1,8 @@
 * Vaarn.el
 A vaults of vaarn emacs package to help running games via org mode.
-#+begin_src
 
-                               X
-                             _____
-                            /     \
-                       X   /       \   X
-                    ._____(    r    )_____.
-                   /       \       /       \
-             _____/    t    \_____/    d    \_____
-            /     \         /     \         /     \
-      X    /       \       /       \       /       \   X
-    ._____(    d    )_____(    a    )_____(    d    )_____.
-   /       \       /       \       /       \       /       \
-  /    d    \_____/    a    \_____/    s    \_____/    h    \
-  \         /     \         /     \         /     \         /
-   \       /       \       /       \       /       \       /
-    )_____(    w    )_____(    a    )_____(    d    )_____(
-   /       \       /       \       /       \       /       \
-  /    w    \_____/    w    \_____/    s    \_____/    h    \
-  \         /     \         /     \         /     \         /
-   \       /       \       /       \       /       \       /
-    )_____(    s    )_____(    s    )_____(    t    )_____(
-   /       \       /       \       /       \       /       \
-  /    s    \_____/    d    \_____/    a    \_____/    h    \
-  \         /     \         /     \         /     \         /
-   \       /       \       /       \       /       \       /
-    )_____(    d    )_____(    s    )_____(    a    )_____(
-   /       \       /       \       /       \       /       \
-  /    s    \_____/    s    \_____/    s    \_____/    h    \
-  \         /     \         /     \         /     \         /
-   \       /       \       /       \       /       \       /
-    \_____(    t    )_____(    t    )_____(    s    )_____/
-       X   \       /       \       /       \       /   X
-            \_____/    t    \_____/    t    \_____/
-                  \         /     \         /
-                   \       /       \       /
-                    \_____(    P    )_____/
-                       X   \       /   X
-                            \_____/
-                               X
-Worm Pollen:
-The sandworms of the Interior reproduce through a baroque, decade-long process of parthenogenesis, culminating in the explosive release of thousands of melon-sized spores into the atmosphere. This worm-pollen drifts back to Urth in ponderous sticky deluges that can last for weeks. Progress through shifting mounds of the stuff is slowed to half normal speed; the upside is that worm-pollen is edible, and many a starving man has been saved by the timely arrival of spores from the heavens. Treat worm-pollen days as providing d4 rations per player.
-#+end_src
+** Weather
+=vaarn-weather-hex= brings up the weather hex map. =vaarn-move-weather-hex= will roll and move around the map. The coordinate is saved between sessions but can be reset with =vaarn-reset-weather=.
 
 ** Acknowledgement
 Attribution to the brilliant Leo Hunt at [[https://vaultsofvaarn.com/][vaultsofvaarn]]. Details on the licesnse for vaarn can be found with the [[https://vaarn.github.io/#/acknowledgements][srd]]
