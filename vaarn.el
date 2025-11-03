@@ -7,7 +7,7 @@
 ;; Version: 0.0.1
 ;; Keywords: emulations games
 ;; Homepage: https://github.com/oliverpauffley/vaarn.el
-;; Package-Requires: ((emacs "25.1"))
+;; Package-Requires: ((emacs "29.1"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -17,7 +17,7 @@
 ;;
 ;;; Code:
 (require 'cl-lib)
-(load-file "./cube.el")
+(require 'cube)
 
 (defgroup vaarn nil
   "Tools for vaarn referees."
@@ -99,15 +99,16 @@ Starting with the top center then working down row by row."
                                        :s 0)
   "The start space on the weather grid (the centre).")
 
-(defvar vaarn-current-weather-coord nil
-  "The current space on the weather grid.
-This is exported so that it can be set in another file
-to have some `memory' of the weather.")
+(define-multisession-variable vaarn--current-weather-coord nil
+  "The current space on the weather grid."
+  :package "vaarn"
+  :synchronized t
+  :storage 'sqlite)
 
 (defun vaarn-reset-weather ()
   "Reset the weather to the centre."
   (interactive)
-  (setq vaarn-current-weather-coord vaarn--starting-weather-coord)
+  (setf (multisession-value vaarn--current-weather-coord) vaarn--starting-weather-coord)
   (vaarn-weather-hex))
 
 (defvar vaarn--weather-hex-map
@@ -198,17 +199,17 @@ Directions
 6 \___/ 4
     5"
   (interactive)
-  (let* ((current-coord (or vaarn-current-weather-coord vaarn--starting-weather-coord))
+  (let* ((current-coord (or (multisession-value vaarn--current-weather-coord) vaarn--starting-weather-coord))
          (next-coord (vaarn--next-coord current-coord)))
-    (setq vaarn-current-weather-coord next-coord)
+    (setf (multisession-value vaarn--current-weather-coord) next-coord)
     (vaarn--draw-weather-hex next-coord)))
 
 (defun vaarn-weather-hex ()
   "Draws a weather hex map in it's own buffer.
 Either loads the location or sets to a default value."
   (interactive)
-  (let ((coord (if (cube-coord-p vaarn-current-weather-coord)
-                   vaarn-current-weather-coord
+  (let ((coord (if (cube-coord-p (multisession-value vaarn--current-weather-coord))
+                   (multisession-value vaarn--current-weather-coord)
                  vaarn--starting-weather-coord)))
     (vaarn--draw-weather-hex coord)))
 
