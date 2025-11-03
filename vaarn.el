@@ -19,7 +19,6 @@
 (require 'cl-lib)
 (require 'cube)
 
-(define-package "vaarn" "0.0.1" "vaults of vaarn in emacs")
 
 (defgroup vaarn nil
   "Tools for vaarn referees."
