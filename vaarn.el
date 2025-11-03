@@ -18,6 +18,7 @@
 ;;; Code:
 (require 'cl-lib)
 (require 'cube)
+(require 'multisession)
 
 
 (defgroup vaarn nil
