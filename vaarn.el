@@ -204,6 +204,7 @@ Directions
     (setf (multisession-value vaarn--current-weather-coord) next-coord)
     (vaarn--draw-weather-hex next-coord)))
 
+;;;###autoload
 (defun vaarn-weather-hex ()
   "Draws a weather hex map in it's own buffer.
 Either loads the location or sets to a default value."
@@ -281,8 +282,7 @@ Then use \\[vaarn-move-weather-hex] to move around the map.
 \\{vaarn-weater-mode-map}"
   :lighter " Vaarn Weather"
   :keymap `((, (kbd "r") . vaarn-move-weather-hex)
-            (, (kbd "e") . vaarn-reset-weather))
-  :interactive nil)
+            (, (kbd "e") . vaarn-reset-weather)))
 
 
 (provide 'vaarn)
