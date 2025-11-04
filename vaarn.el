@@ -172,6 +172,9 @@ With format strings to fill in for the weather in each position.")
       (insert (apply 'format vaarn--weather-hex-map symbols))
       (insert (propertize weather-description 'face 'vaarn--active-location))
       (goto-char 0)
+      (message "%s to move; %s to reset"
+               (substitute-command-keys "\\<vaarn-weather-mode-map>\\[vaarn-move-weather-hex]")
+               (substitute-command-keys "\\<vaarn-weather-mode-map>\\[vaarn-reset-weather]"))
       (setq buffer-read-only t))))
 
 (defun vaarn--prepare-display-locations (locations current-location symbol-mapping weather-descriptions)
