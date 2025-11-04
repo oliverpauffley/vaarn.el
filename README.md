@@ -5,7 +5,7 @@ A vaults of vaarn emacs package to help running games via org mode.
 
 `vaarn-weather-hex` brings up the weather hex map. `vaarn-move-weather-hex` will roll and move around the map. The coordinate is saved between sessions but can be reset with `vaarn-reset-weather`.
 
-[example](images/hex.gif)
+![example](images/hex.gif)
 
 ## Acknowledgement
 
