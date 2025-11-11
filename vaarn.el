@@ -14,7 +14,6 @@
 ;;; Commentary:
 ;; A set of helper functions for vaults of vaarn
 ;;
-;;
 ;;; Code:
 (require 'cl-lib)
 (require 'cube)
@@ -26,7 +25,7 @@
   :group 'tools
   :prefix "vaarn-")
 
-(defconst vaarn--buffer-name "*vaarn-weather*"
+(defconst vaarn--weather-buffer-name "*vaarn-weather*"
   "Buffer name for drawing the weather map to.")
 
 (defcustom vaarn-weather-symbols
@@ -157,11 +156,10 @@ Starting with the top center then working down row by row."
   "A blank weather hex flower.
 With format strings to fill in for the weather in each position.")
 
-;; TODO load postion from file?
 (defun vaarn--draw-weather-hex (location)
   "Draws a weather hex map in it's own buffer, with LOCATION marked."
-  (let* ((buf (get-buffer-create vaarn--buffer-name))
-         (symbols (vaarn--prepare-display-locations vaarn-weather-locations location vaarn-weather-symbols vaarn--weather-descriptions))
+  (let* ((buf (get-buffer-create vaarn--weather-buffer-name))
+         (symbols (vaarn--weather-prepare-display-locations vaarn-weather-locations location vaarn-weather-symbols vaarn--weather-descriptions))
          (weather-description (alist-get (alist-get location vaarn-weather-locations nil nil #'equal) vaarn--weather-descriptions)))
     (with-current-buffer buf
       (setq buffer-read-only nil)
@@ -177,7 +175,7 @@ With format strings to fill in for the weather in each position.")
                (substitute-command-keys "\\<vaarn-weather-mode-map>\\[vaarn-reset-weather]"))
       (setq buffer-read-only t))))
 
-(defun vaarn--prepare-display-locations (locations current-location symbol-mapping weather-descriptions)
+(defun vaarn--weather-prepare-display-locations (locations current-location symbol-mapping weather-descriptions)
   "Convert location weather values LOCATIONS into symbols using SYMBOL-MAPPING.
 If the location is the CURRENT-LOCATION then format with a different face.
 Also adds the weather descriptions as a mouse hover tooltip"
@@ -246,7 +244,7 @@ If the new coord is out of bounds this might wrap or return the same coord as C.
       (> (abs (cube-coord-r c)) 3)
       (> (abs (cube-coord-s c)) 3)))
 
-(defvar vaarn--x-coords
+(defvar vaarn--weather-x-coords
   `(,(cube-co 0 -4 4)
     ,(cube-co -1 -3 4)
     ,(cube-co 1 -4 3)
@@ -260,11 +258,11 @@ If the new coord is out of bounds this might wrap or return the same coord as C.
 
 (defun vaarn--weather-in-x-coord-p (c)
   "Return non nil if the coordinate C is in one of the `X's."
-  (seq-find (lambda (val) (equal c val)) vaarn--x-coords))
+  (seq-find (lambda (val) (equal c val)) vaarn--weather-x-coords))
 
 (defun vaarn--weather-loop-coord (roll c)
-  "Gived a ROLL and C coordinate, loop it around the grid round to the otherside.
-This is actually just swapping the two coordinates in the direction we stepped in."
+  "Gived a ROLL and C coordinate, loop around the grid round to the otherside.
+This is actually just swapping the two coordinates in the stepped direction."
   (cond ((or (= roll 2)(= roll 5)) (cube-coord-flip-not-q c))
         ((or (= roll 3)(= roll 6)) (cube-coord-flip-not-s c))
         ((or (= roll 4)(= roll 1))  (cube-coord-flip-not-r c))))
