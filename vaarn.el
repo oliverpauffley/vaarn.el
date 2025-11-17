@@ -14,6 +14,7 @@
 ;;; Commentary:
 ;; A set of helper functions for vaults of vaarn
 ;;
+;;
 ;;; Code:
 (require 'cl-lib)
 (require 'cube)
@@ -156,26 +157,32 @@ Starting with the top center then working down row by row."
   "A blank weather hex flower.
 With format strings to fill in for the weather in each position.")
 
+
+(defun vaarn--weather-get-current-weather (location)
+  "Return the current weather at LOCATION."
+  (alist-get location vaarn-weather-locations nil nil #'equal))
+
+(defun vaarn--weather-get-description (name)
+  "Given a NAME symbol return the description."
+  (alist-get name vaarn--weather-descriptions))
+
 (defun vaarn--draw-weather-hex (location)
   "Draws a weather hex map in it's own buffer, with LOCATION marked."
   (let* ((buf (get-buffer-create vaarn--weather-buffer-name))
-         (symbols (vaarn--weather-prepare-display-locations vaarn-weather-locations location vaarn-weather-symbols vaarn--weather-descriptions))
-         (weather-description (alist-get (alist-get location vaarn-weather-locations nil nil #'equal) vaarn--weather-descriptions)))
-    (with-current-buffer buf
-      (setq buffer-read-only nil)
-      (erase-buffer)
-      (vaarn-weather-mode 1)
-      (goto-char 0)
-      (display-buffer buf)
-      (insert (apply 'format vaarn--weather-hex-map symbols))
-      (insert (propertize weather-description 'face 'vaarn--active-location))
-      (goto-char 0)
-      (message "%s to move; %s to reset"
-               (substitute-command-keys "\\<vaarn-weather-mode-map>\\[vaarn-move-weather-hex]")
-               (substitute-command-keys "\\<vaarn-weather-mode-map>\\[vaarn-reset-weather]"))
-      (setq buffer-read-only t))))
+         (symbols (vaarn--weather-prepare-display-locations vaarn-weather-locations location vaarn-weather-symbols))
+         (weather-description (vaarn--weather-get-description (vaarn--weather-get-current-weather location))))
+    (save-excursion
+      (with-current-buffer buf
+        (setq buffer-read-only nil)
+        (erase-buffer)
+        (vaarn-weather-mode 1)
+        (goto-char 0)
+        (insert (apply 'format vaarn--weather-hex-map symbols))
+        (insert (propertize weather-description 'face 'vaarn--active-location))
+        (goto-char 0)
+        (setq buffer-read-only t)))))
 
-(defun vaarn--weather-prepare-display-locations (locations current-location symbol-mapping weather-descriptions)
+(defun vaarn--weather-prepare-display-locations (locations current-location symbol-mapping)
   "Convert location weather values LOCATIONS into symbols using SYMBOL-MAPPING.
 If the location is the CURRENT-LOCATION then format with a different face.
 Also adds the weather descriptions as a mouse hover tooltip"
@@ -205,17 +212,27 @@ Directions
   (let* ((current-coord (or (multisession-value vaarn--current-weather-coord) vaarn--starting-weather-coord))
          (next-coord (vaarn--next-coord current-coord)))
     (setf (multisession-value vaarn--current-weather-coord) next-coord)
+    (if (not (vaarn--visible-buffer-p vaarn--weather-buffer-name))
+        (message "Weather is %s" (vaarn--weather-get-description (vaarn--weather-get-current-weather next-coord))))
     (vaarn--draw-weather-hex next-coord)))
+
+(defun vaarn--visible-buffer-p (buf)
+  "Return non-nil if BUF is visible."
+  (get-buffer-window buf))
+
 
 ;;;###autoload
 (defun vaarn-weather-hex ()
   "Draws a weather hex map in it's own buffer.
 Either loads the location or sets to a default value."
   (interactive)
-  (let ((coord (if (cube-coord-p (multisession-value vaarn--current-weather-coord))
-                   (multisession-value vaarn--current-weather-coord)
-                 vaarn--starting-weather-coord)))
-    (vaarn--draw-weather-hex coord)))
+  (let
+      ((buf (get-buffer-create vaarn--weather-buffer-name)))
+    (display-buffer buf)
+    (let ((coord (if (cube-coord-p (multisession-value vaarn--current-weather-coord))
+                     (multisession-value vaarn--current-weather-coord)
+                   vaarn--starting-weather-coord)))
+      (vaarn--draw-weather-hex coord))))
 
 
 (defun vaarn--next-coord (c)
