@@ -20,6 +20,8 @@
 (require 'cube)
 (require 'multisession)
 
+(require 'vaarn-weather)
+
 (defgroup vaarn nil
   "Tools for vaarn referees."
   :group 'tools
