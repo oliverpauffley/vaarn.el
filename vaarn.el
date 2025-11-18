@@ -21,23 +21,12 @@
 (require 'multisession)
 
 (require 'vaarn-weather)
+(require 'vaarn-dice)
 
 (defgroup vaarn nil
   "Tools for vaarn referees."
   :group 'tools
   :prefix "vaarn-")
-
-(defun vaarn--d6 ()
-  "Roll a 6 sided dice."
-  (vaarn--roll-dice 6))
-
-(defun vaarn--roll-dice (size)
-  "Roll a SIZE sided dice."
-  (+ (random size) 1))
-
-(defun vaarn--visible-buffer-p (buf)
-  "Return non-nil if BUF is visible."
-  (get-buffer-window buf))
 
 
 (provide 'vaarn)

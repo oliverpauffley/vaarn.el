@@ -22,6 +22,7 @@
 (require 'cl-lib)
 (require 'cube)
 (require 'multisession)
+(require 'vaarn-dice)
 
 (defconst vaarn-weather--buffer-name "*vaarn-weather*"
   "Buffer name for drawing the weather map to.")
@@ -209,7 +210,7 @@ Directions
   (let* ((current-coord (or (multisession-value vaarn-weather--current-coord) vaarn-weather--starting-coord))
          (next-coord (vaarn-weather--next-coord current-coord)))
     (setf (multisession-value vaarn-weather--current-coord) next-coord)
-    (if (not (vaarn--visible-buffer-p vaarn-weather--buffer-name))
+    (if (not (vaarn-weather--visible-buffer-p vaarn-weather--buffer-name))
         (message "Weather is %s" (vaarn-weather--get-description (vaarn-weather--get-current-weather next-coord))))
     (vaarn-weather--draw-hex next-coord)))
 
@@ -231,7 +232,7 @@ Either loads the location or sets to a default value."
 (defun vaarn-weather--next-coord (c)
   "Calculate a possible next coord from coord C.
 If the new coord is out of bounds this might wrap or return the same coord as C."
-  (let* ((roll (vaarn--d6))
+  (let* ((roll (vaarn-dice--d6))
          (maybe-new-coord (cond ((= roll 1) (cube-coord-move-nw c))
                                 ((= roll 2) (cube-coord-move-n c))
                                 ((= roll 3)  (cube-coord-move-ne c))
@@ -291,6 +292,9 @@ Then use \\[vaarn-weather-move-hex] to move around the map.
             (, (kbd "e") . vaarn-weather-reset)))
 
 
+(defun vaarn-weather--visible-buffer-p (buf)
+  "Return non-nil if BUF is visible."
+  (get-buffer-window buf))
 
 (provide 'vaarn-weather)
 ;;; vaarn-weather.el ends here
