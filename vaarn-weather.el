@@ -89,7 +89,7 @@ Starting with the top center then working down row by row."
   :group 'vaarn)
 
 (defface vaarn-weather--active-location
-  '((t :inherit 'bold :foreground "green"))
+  '((t :inherit 'success))
   "Face for the currently active location on the weather hex map."
   :group 'vaarn)
 
