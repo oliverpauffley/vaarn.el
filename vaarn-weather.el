@@ -195,6 +195,7 @@ Also adds the weather descriptions as a mouse hover tooltip"
           locations))
 
 
+;;;###autoload
 (defun vaarn-weather-move-hex ()
   "Move the from the current coord to a new one.
 This means rolling a dice and moving to the corresponding hex.
