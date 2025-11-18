@@ -22,7 +22,6 @@
 (require 'cl-lib)
 (require 'cube)
 (require 'multisession)
-(require 'vaarn)
 
 (defconst vaarn-weather--buffer-name "*vaarn-weather*"
   "Buffer name for drawing the weather map to.")
@@ -290,6 +289,7 @@ Then use \\[vaarn-weather-move-hex] to move around the map.
   :lighter " Vaarn Weather"
   :keymap `((, (kbd "r") . vaarn-weather-move-hex)
             (, (kbd "e") . vaarn-weather-reset)))
+
 
 
 (provide 'vaarn-weather)

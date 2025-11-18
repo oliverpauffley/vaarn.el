@@ -39,5 +39,6 @@
   "Return non-nil if BUF is visible."
   (get-buffer-window buf))
 
+
 (provide 'vaarn)
 ;;; vaarn.el ends here
