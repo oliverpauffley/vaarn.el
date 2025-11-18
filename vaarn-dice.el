@@ -20,9 +20,9 @@
 
 (defun vaarn-dice--d6 ()
   "Roll a 6 sided dice."
-  (vaarn--roll-dice 6))
+  (vaarn-dice--roll 6))
 
-(defun vaarn-dice--roll-dice (size)
+(defun vaarn-dice--roll (size)
   "Roll a SIZE sided dice."
   (+ (random size) 1))
 
