@@ -11,3 +11,4 @@ A vaults of vaarn emacs package to help running games via org mode.
 
 Attribution to the brilliant Leo Hunt at [vaultsofvaarn](https://vaultsofvaarn.com/). Details on the licesnse for vaarn can be found with the [srd](https://vaarn.github.io/#/acknowledgements)
 
+A load of code was ~~stolen~~ inspired by the work for Howard Abrams and his emacs packages, mainly [emacs-ironsworn](https://gitlab.com/howardabrams/emacs-ironsworn).
